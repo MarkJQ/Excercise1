@@ -6,7 +6,7 @@
 // 'starter.services' is found in services.js
 // 'starter.controllers' is found in controllers.js
 // app.js
-angular.module('starter', ['ionic', 'ngCordova', 'jett.ionic.filter.bar', 'starter.controllers', 'starter.services'])
+angular.module('starter', ['ionic', 'ngCordova', 'chart.js', 'jett.ionic.filter.bar', 'starter.controllers', 'starter.services'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {

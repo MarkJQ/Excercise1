@@ -1,8 +1,16 @@
 angular.module('starter.controllers', [])
 
-.controller('DashCtrl', function($scope) {})
+.controller('DashCtrl', function($scope, $timeout, Foods) {
+  $scope.plotData = Foods.getPlotData();
+  $scope.refreshDiaries = function () {
+    $timeout(function () {
+      $scope.plotData = Foods.getPlotData();
+      $scope.$broadcast('scroll.refreshComplete');
+    }, 1000);
+  };
+})
 
-.controller('FoodsCtrl', function($scope, $state, $timeout, $ionicFilterBar, Foods) {
+.controller('FoodsCtrl', function($scope, $state, $timeout, $ionicFilterBar, $ionicPopup, Foods) {
   // With the new view caching in Ionic, Controllers are only called
   // when they are recreated or on app start, instead of every page change.
   // To listen for when this page is active (for example, to refresh data),
@@ -37,6 +45,45 @@ angular.module('starter.controllers', [])
       $scope.$broadcast('scroll.refreshComplete');
     }, 1000);
   };
+  $scope.showPopup = function(food) {
+    $scope.newDiary = {
+      id: Foods.getDiaries().length,
+      food: food,
+    };
+    $scope.data = {};
+    // An elaborate, custom popup
+    var myPopup = $ionicPopup.show({
+      templateUrl: 'templates/foods-popup.html',
+      title: 'Make a Calories Diary',
+      subTitle: 'How Many Ozs and When did you eat '+food.name,
+      scope: $scope,
+      buttons: [
+        { text: 'Cancel' },
+        {
+          text: '<b>Confirm</b>',
+          type: 'button-positive',
+          onTap: function(e) {
+            if (!$scope.data.amount || !$scope.data.date || !$scope.data.time) {
+              //don't allow the user to close unless he enters wifi password
+              e.preventDefault();
+            } else {
+              var datetime = $scope.data.date.getFullYear()+'-'
+              +("0"+($scope.data.date.getMonth()+1)).slice(-2)+'-'
+              +("0"+$scope.data.date.getDate()).slice(-2)+'T'
+              +("0"+$scope.data.time.getHours()).slice(-2)+':'
+              +("0"+$scope.data.time.getMinutes()).slice(-2)+':'
+              +("0"+$scope.data.time.getSeconds()).slice(-2);
+              
+              $scope.newDiary.amount = $scope.data.amount;
+              $scope.newDiary.date = datetime;
+              Foods.addDiary($scope.newDiary);
+              return $scope.data;
+            }
+          }
+        }
+      ]
+    });
+  }
 
   $scope.foods = Foods.all();
   $scope.remove = function(food) {
